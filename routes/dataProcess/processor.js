@@ -885,13 +885,13 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                 requestTimeout:100000
             }, function (err, resp) {
                 if (err) {
-                    console.log("Bulk Upsert to elastic search failed--",params.length, err);
+                    console.log("Bulk Upsert to elastic search failed--",params.length);
                     resolve('error');
                 } else {
                     if(resp.errors == true) {
-                        console.log('---getting error in upserting latest data---',params.length, resp);
+                        console.log('---getting error in upserting latest data---',params.length);
                     } else {
-                        console.log("Successfully Upsert to elastic search----",params.length, resp);
+                        console.log("Successfully Upsert to elastic search----",params.length);
                     }
                     resolve(resp);
                 }
@@ -1024,7 +1024,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                     console.log("Kinesis Error", err);
                     resolve('error');
                 } else {
-                    console.log("Successfully pushed to Kinesis----"+streamname,packet_data, data);
+                    console.log("Successfully pushed to Kinesis----"+streamname);
                     resolve();
                 }
 
@@ -1070,7 +1070,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
             await connecttoElasticsearch(dmdata_key); // establish new connection
             while (domain_bulk_array.length) {
                 let unciarray = domain_bulk_array.splice(0, 10000);
-                console.log('upserting to elasticsearch domain---', domain_bulk_array.length, unciarray);
+                console.log('upserting to elasticsearch domain---', domain_bulk_array.length);
                 await upsertElasticSearch(unciarray, connections[dmdata_key]);
             }
         }
@@ -1089,7 +1089,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
         var s3filename = "Alpha_" + random_number +'_' + Date.now();
         await uploadFileOnS3(s3filename,out_orginal_data);
     }
-    console.log('---------------OUTPUT DATA---------', output_data);
+    console.log('---------------OUTPUT DATA---------');
     console.log(`Elastic search write completed Successful records after domain ${output_data.length}.`);
     return { statusCode: 200,records: output_data };
 };
