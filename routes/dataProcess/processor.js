@@ -25,6 +25,7 @@ for(let j in domains) {
     domaindata[j] = [];
 }
 module.exports.firehoseConsumer = async (reqEvent) => {
+    console.log(reqEvent);
     var event = JSON.parse(reqEvent);
     // console.log('Event \n',event,'\n');
     function redisConnection() {
