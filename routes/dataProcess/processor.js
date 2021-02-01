@@ -17,7 +17,7 @@ var kinesis = new aws.Kinesis();
 var timezones = {},unicDetails  = {},out_orginal_data=[];
 var clientRedis,elastic_search_client,redisconnectionflag=0,elasticsearchconnectionflag=0,unicParams=[],bulkSecondaryVDetailsInsert=[];
 let domains = JSON.parse(process.env.DOMAINS);
-console.log('Domains',domains);
+// console.log('Domains',domains);
 let connections = {};
 let domaindata  = {};
 
@@ -25,7 +25,7 @@ for(let j in domains) {
     domaindata[j] = [];
 }
 module.exports.firehoseConsumer = async (reqEvent) => {
-    console.log(reqEvent);
+    // console.log(reqEvent);
     var event = JSON.parse(reqEvent);
     // console.log('Event \n',event,'\n');
     function redisConnection() {
@@ -34,7 +34,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
             const REDIS_URL = process.env.REDIS_HOST;
             clientRedis = redis.createClient(REDIS_URL); 
             clientRedis.on('connect', () => {
-                console.log('------------SUCCESSFULLY CONNECTED TO REDIS-----------', process.env.REDIS_HOST);
+                // console.log('------------SUCCESSFULLY CONNECTED TO REDIS-----------', process.env.REDIS_HOST);
                 flag = 1;
                 redisconnectionflag=1;
                 resolve(true);
@@ -61,7 +61,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
             } else {
                 var flag = 0;
                 if(domain && domain!='') {
-                    console.log('trying to connect domain elastic search ',domain);
+                    // console.log('trying to connect domain elastic search ',domain);
                     connections[domain] = new elasticsearch.Client({
                         host: domains[domain]['host'],
                         httpAuth: domains[domain]['httpAuth']                          
@@ -70,11 +70,11 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                         requestTimeout: 10000
                     }, function (error) {
                         if (error) {
-                            console.log("---------------error in elastic search domain connection-------------------",domain,error);
+                            // console.log("---------------error in elastic search domain connection-------------------",domain,error);
                             flag=1;
                             resolve();
                         } else {
-                            console.log("--------------------elastic search domain connected------------------------",domain);
+                            // console.log("--------------------elastic search domain connected------------------------",domain);
                             flag=1;
                             resolve();
                         }
@@ -203,7 +203,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                 };
                 let details = {};
                 await getDatafromelasticsearch('assignments','assignments',query,1).then((assignment_details) => {
-                    if(assignment_details != null && assignment_details != undefined && assignment_details != '' && assignment_details.hits.total > 0){
+                    if(assignment_details != null && assignment_details != undefined && assignment_details != '' && assignment_details.hits.hits.length > 0){
                             details =  {
                                             vehicle_number:assignment_details.hits.hits[0].vehicle_number,
                                             vehicle_name:assignment_details.hits.hits[0].vehicle_name,
@@ -264,7 +264,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                     // console.log('----checking for vehcile information-----');
                     await getDatafromelasticsearch('vehicle_infomation', 'vehicle_infomation', vehicle_query, 1).then((vehicle_details) => {
                         // console.log(vehicle_details);
-                        if(vehicle_details != null && vehicle_details != undefined && vehicle_details != '' && vehicle_details.hits.total > 0){
+                        if(vehicle_details != null && vehicle_details != undefined && vehicle_details != '' && vehicle_details.hits.hits.length > 0){
                                 details =   {
                                                 vehicle_number:vehicle_details.hits.hits[0].vehicle_number,
                                                 vehicle_name:vehicle_details.hits.hits[0].vehicle_name,
@@ -363,7 +363,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                         };
                         await getDatafromelasticsearch('company', 'company', directquery, 1).then((address) => {
                            // console.log('------------Getting company data from Elastic Search direct query----------', address.hits.total);
-                            if (address != null && address != undefined && address != '' && address.hits.total > 0) {
+                            if (address != null && address != undefined && address != '' && address.hits.hits.length > 0) {
                                 let time_zone = address.hits.hits[0]._source.time_zone;
                                 if(time_zone && time_zone!='' && time_zone!=null) {
                                     time_zone = parseFloat(time_zone);
@@ -491,7 +491,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                             };
                             await getDatafromelasticsearch('geocode_data', 'geocode_data', directquery, 1).then((address) => {
                                 // console.log('------------Getting Address data from Elastic Search direct query----------', address.hits.total);
-                                if (address != null && address != undefined && address != '' && address.hits.total > 0) {
+                                if (address != null && address != undefined && address != '' && address.hits.hits.length > 0) {
                                     packet_data.location_name = address.hits.hits[0]._source.address;
                                 }
                             }).catch((err) => {
@@ -519,7 +519,7 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                                             };
                                 await getDatafromelasticsearch('geocode_data','geocode_data',query,1).then((address) => {
                                    // console.log('------------Getting Address data from Elastic Search----------',address.hits.total);
-                                    if(address != null && address != undefined && address != '' && address.hits.total > 0){
+                                    if(address != null && address != undefined && address != '' && address.hits.hits.length > 0){
                                         packet_data.location_name = address.hits.hits[0]._source.address;
                                     }
                                 }).catch((err) => {
@@ -734,8 +734,8 @@ module.exports.firehoseConsumer = async (reqEvent) => {
                                                 }
                                             };
                                             await getDatafromelasticsearch('unic_vehicle_status', 'unic_vehicle_status', unic_last_query, 1).then((unic_details) => {
-                                                console.log('------------Getting last data from unic----------', unic_details.hits.total);
-                                                if (unic_details != null && unic_details != undefined && unic_details != '' && unic_details.hits.total > 0  &&  unic_details.hits.hits[0]._source.date) {
+                                                // console.log('------------Getting last data from unic----------', unic_details.hits.total);
+                                                if (unic_details != null && unic_details != undefined && unic_details != '' && unic_details.hits.hits.length > 0  &&  unic_details.hits.hits[0]._source.date) {
                                                     last_date = unic_details.hits.hits[0]._source.date;
                                                     unicDetails[packet_data.deviceid] = last_date;
                                                 }
